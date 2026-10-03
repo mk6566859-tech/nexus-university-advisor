@@ -1,6 +1,124 @@
+import json
+
 import streamlit as st
 from crew.university_crew import UniversityAdvisorCrew
 from services.config import APP_NAME, MAX_TOTAL_TOKENS
+
+
+def _parse_checkpoint(payload):
+    if isinstance(payload, dict):
+        return payload
+    if not isinstance(payload, str):
+        return None
+
+    text = payload.strip()
+    lines = text.splitlines()
+    if lines and lines[0].lstrip().startswith("```"):
+        lines = lines[1:]
+        if lines and lines[-1].strip().startswith("```"):
+            lines = lines[:-1]
+        text = "\n".join(lines).strip()
+
+    try:
+        checkpoint = json.loads(text)
+    except json.JSONDecodeError:
+        return None
+    return checkpoint if isinstance(checkpoint, dict) else None
+
+
+def _render_checkpoint(stage_name, payload):
+    checkpoint = _parse_checkpoint(payload)
+    if checkpoint is None:
+        st.markdown(str(payload))
+        return
+
+    if stage_name == "admission":
+        requirements = checkpoint.get("requirements", [])
+        if requirements:
+            st.markdown("**Entry requirements**")
+            for requirement in requirements:
+                with st.container(border=True):
+                    st.markdown(f"**{requirement.get('name', 'Requirement')}**")
+                    st.write(f"Expected: {requirement.get('required_value', 'Not listed')}")
+                    source_status = requirement.get("source_status")
+                    if source_status:
+                        st.caption(f"Catalogue label: {source_status.replace('_', ' ').title()}")
+
+        documents = checkpoint.get("documents", [])
+        if documents:
+            st.markdown("**Documents to prepare**")
+            for document in documents:
+                st.markdown(f"- {document}")
+
+        if checkpoint.get("notes"):
+            st.write(checkpoint["notes"])
+
+        verification = checkpoint.get("verification_needed", [])
+        if verification:
+            st.warning("**Before applying**\n\n" + "\n".join(f"- {item}" for item in verification))
+
+    elif stage_name == "eligibility":
+        status = checkpoint.get("status", "not assessed").replace("_", " ").capitalize()
+        st.info(f"Assessment: {status} based on the supplied catalogue.")
+        if checkpoint.get("summary"):
+            st.write(checkpoint["summary"])
+
+        matches = checkpoint.get("matches", [])
+        if matches:
+            st.markdown("**What matches your profile**")
+            for match in matches:
+                st.markdown(f"- {match}")
+
+        gaps = checkpoint.get("gaps", [])
+        if gaps:
+            st.markdown("**Items to check**")
+            for gap in gaps:
+                st.markdown(f"- {gap}")
+        else:
+            st.caption("No gaps identified in the supplied catalogue.")
+
+        verification = checkpoint.get("verification_needed", [])
+        if verification:
+            st.warning("**Verify with the university**\n\n" + "\n".join(f"- {item}" for item in verification))
+
+    elif stage_name == "recommendation":
+        recommendations = checkpoint.get("recommendations", [])
+        for recommendation in recommendations:
+            with st.container(border=True):
+                st.markdown(f"#### {recommendation.get('programme', 'Programme')}")
+                university = recommendation.get("university")
+                if university:
+                    st.caption(university)
+                if recommendation.get("fit_reason"):
+                    st.markdown("**Why it may fit**")
+                    st.write(recommendation["fit_reason"])
+                if recommendation.get("eligibility_note"):
+                    st.markdown("**Eligibility**")
+                    st.write(recommendation["eligibility_note"])
+
+        alternatives = checkpoint.get("alternatives", [])
+        if alternatives:
+            st.markdown("**Other options**")
+            for alternative in alternatives:
+                if isinstance(alternative, dict):
+                    st.write(" · ".join(str(value) for value in alternative.values()))
+                else:
+                    st.markdown(f"- {alternative}")
+        else:
+            st.caption("No alternative programmes were found in the supplied catalogue.")
+
+        if checkpoint.get("caution"):
+            st.warning(checkpoint["caution"])
+
+    else:
+        for key, value in checkpoint.items():
+            st.markdown(f"**{key.replace('_', ' ').title()}**")
+            if isinstance(value, list):
+                for item in value:
+                    st.markdown(f"- {item}")
+            else:
+                st.write(value)
+
 
 st.set_page_config(
     page_title=APP_NAME,
@@ -155,10 +273,17 @@ if submitted:
     st.markdown(result["final_report"])
     st.markdown('</div>', unsafe_allow_html=True)
 
-    with st.expander("View agent checkpoints"):
-        for stage_name, payload in result["stages"].items():
-            st.markdown(f"**{stage_name.replace('_',' ').title()}**")
-            st.markdown(payload)
+    with st.expander("Assessment details"):
+        stages = list(result["stages"].items())
+        tab_labels = {
+            "admission": "Requirements",
+            "eligibility": "Eligibility",
+            "recommendation": "Recommendations",
+        }
+        tabs = st.tabs([tab_labels.get(stage, stage.title()) for stage, _ in stages])
+        for tab, (stage_name, payload) in zip(tabs, stages):
+            with tab:
+                _render_checkpoint(stage_name, payload)
 else:
     st.markdown("""
     <div class="section card">
