@@ -67,9 +67,9 @@ class UniversityAdvisorCrew:
         advisor_task = create_advisor_task(
             self.advisor_agent,
             clip_text(student_context, 1000),
-            clip_text(admission_output, 1200),
-            clip_text(eligibility_output, 1200),
-            clip_text(recommendation_output, 1400),
+            clip_text(admission_output, 550),
+            clip_text(eligibility_output, 550),
+            clip_text(recommendation_output, 550),
         )
         enforce_stage_budget(advisor_task.description, 1100)
         advisor_result = Crew(
