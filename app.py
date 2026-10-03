@@ -158,7 +158,7 @@ if submitted:
     with st.expander("View agent checkpoints"):
         for stage_name, payload in result["stages"].items():
             st.markdown(f"**{stage_name.replace('_',' ').title()}**")
-            st.json(payload)
+            st.markdown(payload)
 else:
     st.markdown("""
     <div class="section card">
