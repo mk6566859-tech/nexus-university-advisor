@@ -1,0 +1,38 @@
+{
+  "note": "DEMO DATA ONLY. Replace this file with verified official university/programme requirements before using the app for real admissions decisions.",
+  "universities": [
+    {
+      "name": "Example University",
+      "country": "Pakistan",
+      "programmes": [
+        {
+          "name": "BS Computer Science",
+          "requirements": [
+            "Higher secondary qualification or equivalent",
+            "Mathematics subject at secondary/higher-secondary level",
+            "Minimum overall score: 60%"
+          ],
+          "documents": ["Academic transcript", "Identity document", "Application form"]
+        },
+        {
+          "name": "BS Artificial Intelligence",
+          "requirements": [
+            "Higher secondary qualification or equivalent",
+            "Mathematics subject at secondary/higher-secondary level",
+            "Minimum overall score: 65%"
+          ],
+          "documents": ["Academic transcript", "Identity document", "Application form"]
+        },
+        {
+          "name": "BS Data Science",
+          "requirements": [
+            "Higher secondary qualification or equivalent",
+            "Mathematics subject at secondary/higher-secondary level",
+            "Minimum overall score: 60%"
+          ],
+          "documents": ["Academic transcript", "Identity document", "Application form"]
+        }
+      ]
+    }
+  ]
+}

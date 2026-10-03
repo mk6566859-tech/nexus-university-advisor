@@ -1,0 +1,2 @@
+streamlit==1.64.0
+crewai[litellm]==1.15.23

@@ -1,0 +1,6 @@
+# Reference task map. Runtime task construction is kept in separate Python modules
+# because each task receives stage-specific compact context.
+admission_task: Admission requirements checkpoint
+eligibility_task: Eligibility checkpoint
+recommendation_task: Programme recommendation checkpoint
+advisor_task: Final advisor report

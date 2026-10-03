@@ -1,0 +1,10 @@
+# Reference configuration. The runnable app defines agents in separate Python files
+# so each agent remains independently testable and maintainable.
+admission_agent:
+  role: Admission Requirements Analyst
+eligibility_agent:
+  role: Student Eligibility Evaluator
+recommendation_agent:
+  role: Programme Recommendation Specialist
+advisor_agent:
+  role: Senior University Advisor
